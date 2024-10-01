@@ -6,7 +6,7 @@ This chapter focuses on evaluating and comparing retrieval systems and machine l
 
 ### Demos
 
-- **evaluation.xlsx**: interactive Excel to showcase different evaluation metrics such as precision, recall, and confusion matrix
+- **01-evaluation.xlsx**: interactive Excel to showcase different evaluation metrics such as precision, recall, and confusion matrix
 
 
 
