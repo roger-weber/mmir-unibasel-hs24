@@ -56,7 +56,7 @@ class TopKList:
         else:
             self.term_weights = {}
             self.terms = []
-            self.weigths = {}
+            self.weights = {}
 
     def add(self, doc_id: int, score: float):
         # delay evaluation of predicate as it could be potentially expensive
@@ -163,68 +163,3 @@ class BIRRetriever:
         if self.PRUNE_TOPK:
             term_weights = sorted(term_weights, key = lambda t: (-abs(t[1]),len(self.index[t[0]]),t[0]))[:self.PRUNE_TOPK]
         return term_weights
-
-
-
-class BIRRetriever_DAAT(BIRRetriever):
-    """
-        Implements the DAAT model for the BIR model using inverted index method.
-    """
-    def search(self, query: str, k: int, feedback: Feedback, predicate: Callable[[int], bool] = None, selected_docs: set[int] = None) -> TopKList:
-        query_vector = self._get_vector(query)
-
-        # filter terms and obtain c_j-weights for terms in order of their importance 
-        term_weights = self.query_weights(query_vector, feedback)
-        
-        # get iterators for each term and fetch first posting
-        iters = [iter(self.index[term]) for (term, _) in term_weights]
-        nexts = [next(iter, None) for iter in iters]
-
-        # keep track of all retrieved documents and their score; stored as tuples (doc_id, score)
-        topk = TopKList(k, term_weights, predicate)
-
-        # iterate through all streams and calculate score for smallest doc id
-        while any(e for e in nexts):
-            # get smallest value from nexts, ignoring None values
-            smallest = min(nexts, key = lambda x: x or math.inf)
-
-            # if we have feedback, make sure document is either relevant or not assessed so far; if we have selected_docs, make sure document is in it
-            if not(self.PRUNE_NON_RELEVANT and feedback.is_not_relevant(smallest)) and (selected_docs is None or smallest in selected_docs):
-                # if so, add it to topk
-                score = sum([term_weights[i][1] for i in range(len(nexts)) if nexts[i] == smallest])
-                topk.add(smallest, score)
-            
-            # for each entry in nexts, fetch next item if entry equals smallest
-            for i, e in enumerate(nexts):
-                if e is smallest:
-                    nexts[i] = next(iters[i], None)
-        
-        # finished, return topk for result iteration
-        return topk
-    
-
-class BIRRetriever_TAAT(BIRRetriever):
-    """
-        Implements the TAAT model for the BIR model using inverted index method.
-    """
-    def search(self, query: str, k: int, feedback: Feedback, predicate: Callable[[int], bool] = None, selected_docs: set[int] = None) -> TopKList:
-        query_vector = self._get_vector(query)
-
-        # filter terms and obtain c_j-weights for terms in order of their importance 
-        term_weights = self.query_weights(query_vector, feedback)
-        doc_scores = defaultdict(float)
-
-        # iterate over terms and fetch postings
-        for (term, weight) in term_weights:
-            for doc_id in self.index[term]:
-                # check if it is either not assessed or relevant; check if doc_id is selected_docs (if given)
-                if not(self.PRUNE_NON_RELEVANT and feedback.is_not_relevant(doc_id)) and (selected_docs is None or doc_id in selected_docs):
-                    doc_scores[doc_id] += weight
-
-        # we do not need a full sort of doc_scores, but can use the heap in TopKList
-        topk = TopKList(k, term_weights, predicate)
-        for doc_id, score in doc_scores.items():
-            topk.add(doc_id, score)
-        
-        # finisheds, return topk for result iteration
-        return topk

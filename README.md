@@ -163,3 +163,9 @@ This overview provides a summary of the content covered in the Multimedia Retrie
 
 - [Web Site Course (Uni Basel)](https://dmi.unibas.ch/de/studium/computer-science-informatik/lehrangebot-hs24/lecture-multimedia-retrieval/)
 - [Link to Adam (Students only)](https://adam.unibas.ch/goto_adam_crs_1738202.html)
+
+
+## git issue with large files
+```
+git config http.postBuffer 524288000     
+```

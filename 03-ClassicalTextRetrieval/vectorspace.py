@@ -1,4 +1,4 @@
-from helpers import tokenize, reduce_to_stems, eliminate_stopwords, set_of_words
+from helpers import tokenize, reduce_to_stems, eliminate_stopwords, bag_of_words
 from heapq import heappop, heappush
 from typing import Callable
 import math
@@ -140,6 +140,8 @@ class VSRetriever:
             self._build_vocabulary()
             self._normalize_vectors()
             self._build_postings()
+        self.n_terms = len(self.vocabulary)
+        self.all = set(self.documents.keys())
 
     def query_weights(self, vector: dict[str, int], measure: str) -> list[tuple[str,float]]:
         # remove terms not in vocabulary
@@ -180,7 +182,7 @@ class VSRetriever_DAAT(VSRetriever):
             # get smallest value from nexts, ignoring None values
             smallest = min(nexts, key = lambda x: x and x[0] or math.inf)[0]
             # if selected_docs is given and smallest is not in selected_docs, skip this document
-            if selected_docs == None or smallest in selected_docs:
+            if selected_docs is None or smallest in selected_docs:
                 # if so, add it to topk
                 score = sum([nexts[i][1] * term_weights[i][1] for i in range(len(nexts)) if nexts[i] and nexts[i][0] == smallest])
                 topk.add(smallest, score)
@@ -193,7 +195,7 @@ class VSRetriever_DAAT(VSRetriever):
         return topk
     
 
-class VVSRetriever_TAAT(VSRetriever):
+class VSRetriever_TAAT(VSRetriever):
     """
         Implements the TAAT model for the Vector Space model using inverted index method.
     """
@@ -208,7 +210,7 @@ class VVSRetriever_TAAT(VSRetriever):
         for (term, weight) in term_weights:
             for (doc_id, tfidf) in self.index[term]:
                 # check if doc_id is selected_docs (if given)
-                if selected_docs == None or doc_id in selected_docs:
+                if selected_docs is None or doc_id in selected_docs:
                     doc_scores[doc_id] += weight * tfidf
 
         # we do not need a full sort of doc_scores, but can use the heap in TopKList
