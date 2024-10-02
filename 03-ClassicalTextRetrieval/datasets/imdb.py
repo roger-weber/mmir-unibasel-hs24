@@ -35,7 +35,7 @@ def load() -> DocumentCollection:
 def format(doc: dict, row: list[str] = None) -> list[str]:
     trim = lambda s,n: len(s) > n and s[:n] + "\u2026" or s
     row = row or []
-    row.append(str(doc.get('docId', 0)))
+    row.append(str(doc.get('id', 0)))
     row.append(trim(doc['title'], 30))
     row.append(str(doc['year']))
     row.append(str(doc['runtime']))
@@ -48,7 +48,7 @@ def format(doc: dict, row: list[str] = None) -> list[str]:
 
 def headers(*args: str) -> list[str]:
     headers = list(args)
-    headers.append('docId')
+    headers.append('id')
     headers.append('title')
     headers.append('year')
     headers.append('runtime')

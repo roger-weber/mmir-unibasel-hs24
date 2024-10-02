@@ -14,13 +14,13 @@ def load(nDocs = 100, nTerms = 5) -> list[dict]:
 
 def format(doc: dict, row: list[str] = None) -> list[str]:
     row = row or []
-    row.append(str(doc.get('docId')))
+    row.append(str(doc.get('id')))
     row.append(doc.get('text'))
     return row
 
 
 def headers(*args: str) -> list[str]:
     headers = list(args)
-    headers.append('docId')
+    headers.append('id')
     headers.append('text')
     return headers
