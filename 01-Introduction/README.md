@@ -6,5 +6,5 @@ In this chapter, we explore the motivation behind multimedia retrieval, trace it
 
 ### Demos
 
-- [Extract features from images](01-extract-features.ipynb): extract features from images and text using classical and generative AI methods (requires AWS account with bedrock/Claude enabled)
+- [Extract features from images and audio](01-extract-features.ipynb): extract features from images and text using classical and generative AI methods (requires AWS account with bedrock/Claude enabled)
 
